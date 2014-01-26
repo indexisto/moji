@@ -64,7 +64,7 @@ class MojiFileImpl implements MojiFile {
     boolean exists = false;
     try {
       lock.readLock().lock();
-      ExistsCommand command = new ExistsCommand(key, domain);
+      final ExistsCommand command = new ExistsCommand(key, domain);
       executor.executeCommand(command);
       exists = command.getExists();
       log.debug("exists() -> {}", exists);
@@ -79,7 +79,7 @@ class MojiFileImpl implements MojiFile {
     log.debug("delete() : {}", this);
     try {
       lock.writeLock().lock();
-      DeleteCommand command = new DeleteCommand(key, domain);
+      final DeleteCommand command = new DeleteCommand(key, domain);
       executor.executeCommand(command);
     } finally {
       lock.writeLock().unlock();
@@ -92,7 +92,7 @@ class MojiFileImpl implements MojiFile {
     long length = -1L;
     try {
       lock.readLock().lock();
-      FileLengthCommand command = new FileLengthCommand(httpFactory, key, domain);
+      final FileLengthCommand command = new FileLengthCommand(httpFactory, key, domain);
       executor.executeCommand(command);
       length = command.getLength();
       log.debug("length() -> {}", length);
@@ -107,13 +107,13 @@ class MojiFileImpl implements MojiFile {
     log.debug("getInputStream() : {}", this);
     InputStream inputStream = null;
     try {
-      Lock readLock = lock.readLock();
+      final Lock readLock = lock.readLock();
       readLock.lock();
-      GetInputStreamCommand command = new GetInputStreamCommand(key, domain, httpFactory, readLock);
+      final GetInputStreamCommand command = new GetInputStreamCommand(key, domain, httpFactory, readLock);
       executor.executeCommand(command);
       inputStream = command.getInputStream();
       log.debug("getInputStream() -> {}", inputStream);
-    } catch (Throwable e) {
+    } catch (final Throwable e) {
       unlockQuietly(lock.readLock());
       IOUtils.closeQuietly(inputStream);
       if (e instanceof IOException) {
@@ -131,14 +131,14 @@ class MojiFileImpl implements MojiFile {
     log.debug("getOutputStream() : {}", this);
     OutputStream outputStream = null;
     try {
-      Lock writeLock = lock.writeLock();
+      final Lock writeLock = lock.writeLock();
       writeLock.lock();
-      GetOutputStreamCommand command = new GetOutputStreamCommand(trackerFactory, httpFactory, key, domain,
+      final GetOutputStreamCommand command = new GetOutputStreamCommand(trackerFactory, httpFactory, key, domain,
           storageClass, writeLock);
       executor.executeCommand(command);
       outputStream = command.getOutputStream();
       log.debug("getOutputStream() -> {}", outputStream);
-    } catch (Throwable e) {
+    } catch (final Throwable e) {
       unlockQuietly(lock.writeLock());
       IOUtils.closeQuietly(outputStream);
       if (e instanceof IOException) {
@@ -152,11 +152,32 @@ class MojiFileImpl implements MojiFile {
   }
 
   @Override
+  public void put(byte[] b) throws IOException {
+      log.debug("put() : {}", this);
+      try {
+        final Lock writeLock = lock.writeLock();
+        writeLock.lock();
+        final PutCommand command = new PutCommand(trackerFactory, httpFactory, key, domain,
+            storageClass, b, writeLock);
+        executor.executeCommand(command);
+        log.debug("put() complete: {}", this);
+      } catch (final Throwable e) {
+        unlockQuietly(lock.writeLock());
+        if (e instanceof IOException) {
+          throw (IOException) e;
+        } else {
+          throw new RuntimeException(e);
+        }
+      }
+  }
+
+
+  @Override
   public void rename(String newKey) throws IOException {
     log.debug("rename() : {}", this);
     try {
       lock.writeLock().lock();
-      RenameCommand command = new RenameCommand(key, domain, newKey);
+      final RenameCommand command = new RenameCommand(key, domain, newKey);
       executor.executeCommand(command);
       key = newKey;
     } finally {
@@ -172,7 +193,7 @@ class MojiFileImpl implements MojiFile {
     }
     try {
       lock.writeLock().lock();
-      UpdateStorageClassCommand command = new UpdateStorageClassCommand(key, domain, newStorageClass);
+      final UpdateStorageClassCommand command = new UpdateStorageClassCommand(key, domain, newStorageClass);
       executor.executeCommand(command);
       storageClass = newStorageClass;
     } finally {
@@ -186,7 +207,7 @@ class MojiFileImpl implements MojiFile {
     List<URL> paths = Collections.emptyList();
     try {
       lock.readLock().lock();
-      GetPathsCommand command = new GetPathsCommand(key, domain);
+      final GetPathsCommand command = new GetPathsCommand(key, domain);
       executor.executeCommand(command);
       paths = command.getPaths();
       log.debug("getPaths() -> {}", paths);
@@ -202,7 +223,7 @@ class MojiFileImpl implements MojiFile {
     MojiFileAttributes attributes = null;
     try {
       lock.readLock().lock();
-      GetAttributesCommand command = new GetAttributesCommand(key, domain);
+      final GetAttributesCommand command = new GetAttributesCommand(key, domain);
       executor.executeCommand(command);
       attributes = command.getAttributes();
       log.debug("getAttributes() -> {}", attributes);
@@ -224,7 +245,7 @@ class MojiFileImpl implements MojiFile {
 
   @Override
   public String toString() {
-    StringBuilder builder = new StringBuilder();
+    final StringBuilder builder = new StringBuilder();
     builder.append("MogileFileImpl [domain=");
     builder.append(domain);
     builder.append(", key=");
@@ -248,8 +269,7 @@ class MojiFileImpl implements MojiFile {
   private void unlockQuietly(Lock lock) {
     try {
       lock.unlock();
-    } catch (IllegalMonitorStateException e) {
+    } catch (final IllegalMonitorStateException e) {
     }
   }
-
 }

@@ -83,6 +83,15 @@ class LocalMojiFile implements MojiFile {
   }
 
   @Override
+  public void put(byte[] b) throws IOException {
+      if (!file.exists()) {
+        file.createNewFile();
+      }
+      FileUtils.writeByteArrayToFile(file, b);
+  }
+
+
+  @Override
   public void copyToFile(File destination) throws IOException {
     if (!file.exists()) {
       throw new FileNotFoundException(file.getCanonicalPath());
@@ -103,7 +112,7 @@ class LocalMojiFile implements MojiFile {
     if (!file.exists()) {
       throw new FileNotFoundException(file.getCanonicalPath());
     }
-    File destination = new File(baseDir, namingStrategy.newFileName(domain, newKey, storageClass));
+    final File destination = new File(baseDir, namingStrategy.newFileName(domain, newKey, storageClass));
     file.renameTo(destination);
     file = destination;
     key = newKey;
@@ -133,12 +142,12 @@ class LocalMojiFile implements MojiFile {
       throw new FileNotFoundException(file.getCanonicalPath());
     }
     file.renameTo(new File(baseDir, namingStrategy.newFileName(domain, key, newStorageClass)));
-    this.storageClass = newStorageClass;
+    storageClass = newStorageClass;
   }
 
   @Override
   public String toString() {
-    StringBuilder builder = new StringBuilder();
+    final StringBuilder builder = new StringBuilder();
     builder.append("LocalMogileFile [domain=");
     builder.append(domain);
     builder.append(", key=");
@@ -159,5 +168,4 @@ class LocalMojiFile implements MojiFile {
   String getStorageClass() {
     return storageClass;
   }
-
 }

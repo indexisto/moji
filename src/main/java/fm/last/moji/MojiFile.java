@@ -29,7 +29,7 @@ public interface MojiFile {
 
   /**
    * Determines whether or not the file represented by this object exists in MogileFS.
-   * 
+   *
    * @return <code>true</code> if the file exists in MogileFS, <code>false</code> otherwise.
    * @throws IOException If there was a problem communicating with MogileFS.
    */
@@ -37,14 +37,14 @@ public interface MojiFile {
 
   /**
    * Deletes this file in MogileFS if it exists. If the file doesn't exists then this method will return without error.
-   * 
+   *
    * @throws IOException If there was a problem communicating with MogileFS.
    */
   void delete() throws IOException;
 
   /**
    * Assigns a new key to the MogileFS file represented by this object.
-   * 
+   *
    * @param key The new key for the file.
    * @throws fm.last.moji.tracker.UnknownKeyException If this file doesn't exist in MogileFS.
    * @throws fm.last.moji.tracker.KeyExistsAlreadyException If the new key already points to a file in MogileFS.
@@ -54,7 +54,7 @@ public interface MojiFile {
 
   /**
    * Gets an InputStream to the content of the MogileFS file represented by this object.
-   * 
+   *
    * @throws fm.last.moji.tracker.UnknownKeyException If this file doesn't exist in MogileFS.
    * @throws IOException If there was a problem communicating with MogileFS.
    */
@@ -63,14 +63,22 @@ public interface MojiFile {
   /**
    * Gets an OutputStream for writing content to the MogileFS file represented by this object. If the file does not
    * exist then it will be created.
-   * 
+   *
    * @throws IOException If there was a problem communicating with MogileFS.
    */
   OutputStream getOutputStream() throws IOException;
 
   /**
+   * Writes an byte array to the MogileFS file represented by this object. If the file does not
+   * exist then it will be created.
+   *
+   * @throws IOException If there was a problem communicating with MogileFS.
+   */
+  void put(byte[] b) throws IOException;
+
+  /**
    * Copies the content of the file represented by this object to a local file destination.
-   * 
+   *
    * @param file
    * @throws fm.last.moji.tracker.UnknownKeyException If this file doesn't exist in MogileFS.
    * @throws IOException
@@ -79,7 +87,7 @@ public interface MojiFile {
 
   /**
    * Returns the length in bytes of this remote file.
-   * 
+   *
    * @return File length in bytes.
    * @throws fm.last.moji.tracker.UnknownKeyException If this file doesn't exist in MogileFS.
    * @throws IOException If there was a problem communicating with MogileFS.
@@ -88,7 +96,7 @@ public interface MojiFile {
 
   /**
    * Assigns this file to the specified storage class.
-   * 
+   *
    * @param storageClass The new storage class
    * @throws fm.last.moji.tracker.UnknownKeyException If this file doesn't exist in MogileFS.
    * @throws fm.last.moji.tracker.UnknownStorageClassException If the specified storage class is not defined in
@@ -99,7 +107,7 @@ public interface MojiFile {
 
   /**
    * Returns a list of storage node paths from which this file can be accessed.
-   * 
+   *
    * @return A list of storage node paths or an empty list.
    * @throws fm.last.moji.tracker.UnknownKeyException If this file doesn't exist in MogileFS.
    * @throws IOException If there was a problem communicating with MogileFS.
@@ -108,14 +116,14 @@ public interface MojiFile {
 
   /**
    * The key of this file in MogileFS.
-   * 
+   *
    * @return This files key.
    */
   String getKey();
 
   /**
    * The MogileFS domain in which this file is located.
-   * 
+   *
    * @return This files key.
    */
   String getDomain();

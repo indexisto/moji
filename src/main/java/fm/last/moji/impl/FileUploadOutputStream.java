@@ -57,6 +57,22 @@ class FileUploadOutputStream extends OutputStream {
     delegate = new CountingOutputStream(httpConnection.getOutputStream());
   }
 
+  FileUploadOutputStream(TrackerFactory trackerFactory, HttpConnectionFactory httpFactory, String key, String domain, long contentLength,
+      Destination destination, Lock writeLock) throws IOException {
+    this.destination = destination;
+    this.trackerFactory = trackerFactory;
+    this.domain = domain;
+    this.key = key;
+    this.writeLock = writeLock;
+
+    log.debug("HTTP PUT -> opening fixed length stream -> {}", destination.getPath());
+    httpConnection = httpFactory.newConnection(destination.getPath());
+    httpConnection.setRequestMethod("PUT");
+    httpConnection.setFixedLengthStreamingMode(contentLength);
+    httpConnection.setDoOutput(true);
+    delegate = new CountingOutputStream(httpConnection.getOutputStream());
+  }
+
   @Override
   public void write(int b) throws IOException {
     delegate.write(b);
@@ -90,8 +106,8 @@ class FileUploadOutputStream extends OutputStream {
           delegate.close();
         } finally {
           try {
-            String message = httpConnection.getResponseMessage();
-            int code = httpConnection.getResponseCode();
+            final String message = httpConnection.getResponseMessage();
+            final int code = httpConnection.getResponseCode();
             if (HttpURLConnection.HTTP_OK != code && HttpURLConnection.HTTP_CREATED != code) {
               throw new IOException(code + " " + message);
             } else {
@@ -104,7 +120,7 @@ class FileUploadOutputStream extends OutputStream {
       }
     } finally {
       log.debug("Bytes written: {}", size);
-      Tracker tracker = trackerFactory.getTracker();
+      final Tracker tracker = trackerFactory.getTracker();
       try {
         tracker.createClose(key, domain, destination, size);
       } finally {
@@ -119,7 +135,7 @@ class FileUploadOutputStream extends OutputStream {
 
   @Override
   public String toString() {
-    StringBuilder builder = new StringBuilder();
+    final StringBuilder builder = new StringBuilder();
     builder.append("FileUploadOutputStream [domain=");
     builder.append(domain);
     builder.append(", key=");
@@ -133,7 +149,7 @@ class FileUploadOutputStream extends OutputStream {
   private void unlockQuietly(Lock lock) {
     try {
       lock.unlock();
-    } catch (IllegalMonitorStateException e) {
+    } catch (final IllegalMonitorStateException e) {
     }
   }
 
