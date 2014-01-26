@@ -211,6 +211,17 @@ public class MojiFileImplTest {
   }
 
   @Test
+  public void put() throws IOException {
+    file.setExecutor(mockExecutor);
+    file.put(new byte[]{1,2,3});
+    ArgumentCaptor<PutCommand> captor = ArgumentCaptor.forClass(PutCommand.class);
+    verify(mockExecutor).executeCommand(captor.capture());
+    assertThat(captor.getValue().key, is(KEY));
+    assertThat(captor.getValue().domain, is(DOMAIN));
+    assertThat(captor.getValue().storageClass, is(STORAGE_CLASS));
+  }
+  
+  @Test
   public void getOutputStreamCommandReturn() throws IOException {
     URL path = new URL("http://localhost:80/");
     Destination destination = new Destination(path, 2, 4);
